@@ -1,6 +1,6 @@
 {
     "name": "smartreact",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "TypeScript React + Material-UI template project working with SmartERP APIs",
     "private": false,
     "homepage": "./",

@@ -70,7 +70,7 @@ function Login(props: RouteComponentProps) {
     const { location, history } = props;
 
     // User sate
-    const { dispatch } = useContext(UserStateContext);
+    const { state, dispatch } = useContext(UserStateContext);
 
     // Controller, should be in the function main body
     const api = React.useMemo(() => new UserLoginController(), []);
@@ -190,7 +190,7 @@ function Login(props: RouteComponentProps) {
     // Ready
     React.useEffect(() => {
         // Trying login only
-        if (!tryingLogin) return;
+        if (!tryingLogin || state.authorized) return;
 
         // Show loading bar
         api.singleton.showLoading('Loading...');
@@ -215,7 +215,21 @@ function Login(props: RouteComponentProps) {
                 }
             }
         );
-    }, [tryingLogin, api, dispatch, loginResult, loginSuccess, saveLoginData]);
+    }, [
+        tryingLogin,
+        state.authorized,
+        api,
+        dispatch,
+        loginResult,
+        loginSuccess,
+        saveLoginData
+    ]);
+
+    if (state.authorized) {
+        // When logined
+        // Empty component
+        return <></>;
+    }
 
     let savedUserId: string = '';
     if (saveLoginData) {
