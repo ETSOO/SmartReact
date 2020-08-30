@@ -3,7 +3,10 @@ import {
     IApiConfigurableHost,
     IApiSettings,
     ApiSettings,
-    LoginMethod
+    LoginMethod,
+    ApiSingleton,
+    createClient,
+    ApiDataError
 } from 'etsoo-react';
 import { DomUtils } from '@etsoo/shared';
 
@@ -49,10 +52,36 @@ export const Settings: IAppSettings = {
     ...((window as unknown) as IApiConfigurableHost).configs
 };
 
+// Rest client
+const api = createClient();
+
+// Base url of the API
+api.baseUrl = Settings.endpoint;
+
+// Singleton
+const singleton = ApiSingleton.getInstance(api);
+
+// Global API error handler
+api.onError = (error: ApiDataError<any>) => {
+    // Error code
+    const status = error.response
+        ? api.transformResponse(error.response).status
+        : undefined;
+
+    // Report the error
+    // When status is equal to 401, redirect to login page
+    singleton.reportError(error.toString(), () => {
+        if (status === 401) {
+            // Redirect to login page
+            window.location.href = '/login';
+        }
+    });
+};
+
 /**
  * Update core api settings
  */
 export const {
     context: LanguageStateContext,
     provider: LanguageStateProvider
-} = ApiSettings.setup(Settings);
+} = ApiSettings.setup(Settings, singleton);

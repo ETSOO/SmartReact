@@ -23,7 +23,9 @@ import {
     IUserUpdate,
     IViewModel,
     SaveLogin,
-    LanguageChooser
+    LanguageChooser,
+    ApiSettings,
+    UserActionType
 } from 'etsoo-react';
 import { Settings, LanguageStateContext } from '../app/Settings';
 import LoginForm from './LoginForm';
@@ -157,8 +159,9 @@ function Login(props: RouteComponentProps) {
     // Login action
     async function doLogin(data: DataTypes.DynamicData) {
         // Attach the limited organization id
+        const settings = ApiSettings.get();
         Object.assign(data, {
-            org: api.singleton.settings.org
+            org: settings.org
         });
 
         // Show loading bar
@@ -187,6 +190,10 @@ function Login(props: RouteComponentProps) {
     const saveLoginData = SaveLogin.get();
     let tryingLogin = false;
 
+    // inaccessibleLabel;
+    const inaccessibleLabel: string = L.labels.inaccessible;
+    const tryAgainLabel: string = L.labels.try_again;
+
     // Ready
     React.useEffect(() => {
         // Trying login only
@@ -202,19 +209,39 @@ function Login(props: RouteComponentProps) {
         };
 
         // Act
-        api.loginToken(dispatch, loginTokenData, loginSuccess).then(
-            (result) => {
-                // Error occured
-                if (result == null) return;
-
-                // Do result only successful
-                if (result.ok) loginResult(result);
-                else {
-                    // Hide loading bar
-                    api.singleton.hideLoading();
-                }
+        api.loginToken(dispatch, loginTokenData, loginSuccess, (error) => {
+            if (error.response == null) {
+                // Connection error
+                api.singleton.reportError(
+                    inaccessibleLabel,
+                    () => {
+                        // Refresh to login page
+                        dispatch({ type: UserActionType.Logout });
+                    },
+                    tryAgainLabel
+                );
+                return false;
             }
-        );
+
+            // Clear token
+            SaveLogin.update(undefined);
+
+            // Refresh to login page
+            dispatch({ type: UserActionType.Logout });
+
+            // Prevent further handling
+            return false;
+        }).then((result) => {
+            // Error occured
+            if (result == null) return;
+
+            // Do result only successful
+            if (result.ok) loginResult(result);
+            else {
+                // Hide loading bar
+                api.singleton.hideLoading();
+            }
+        });
     }, [
         tryingLogin,
         state.authorized,
@@ -222,7 +249,9 @@ function Login(props: RouteComponentProps) {
         dispatch,
         loginResult,
         loginSuccess,
-        saveLoginData
+        saveLoginData,
+        inaccessibleLabel,
+        tryAgainLabel
     ]);
 
     if (state.authorized) {

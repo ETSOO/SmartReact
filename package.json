@@ -1,11 +1,11 @@
 {
     "name": "smartreact",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "TypeScript React + Material-UI template project working with SmartERP APIs",
     "private": false,
     "homepage": "./",
     "dependencies": {
-        "@etsoo/shared": "^1.0.4",
+        "@etsoo/shared": "^1.0.5",
         "@material-ui/core": "^4.11.0",
         "@material-ui/icons": "^4.9.1",
         "@material-ui/lab": "^4.0.0-alpha.56",
@@ -18,7 +18,7 @@
         "@types/react-dom": "^16.9.8",
         "@types/react-router-dom": "^5.1.5",
         "@types/yup": "^0.29.6",
-        "etsoo-react": "^1.0.35",
+        "etsoo-react": "^1.0.38",
         "history": "^4.0.0",
         "react": "^16.13.1",
         "react-dom": "^16.13.1",
